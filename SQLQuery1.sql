@@ -404,6 +404,250 @@ begin
      e
 end
 
+create table Plants
+(
+ Id int primary key identity(1,1),
+ Name nvarchar(50) not null
+)
+
+insert into Plants values('Plant 01'), ('Plant 02'), ('Plant 03');
+select * from Plants;
+
+create table Chemicals
+(
+ Id int primary key identity(1,1),
+ Name nvarchar(50) not null
+)
+
+insert into Chemicals values('Chemical 01'), ('Chemical 02'), ('Chemical 03');
+select * from Chemicals;
+
+--Cross Join Chemicals
+--Order by Plants.Name;
+
+Select FullName, Position, (Select name from Departments where Id = DepartmentId) as Department From Employees;
+
+----View
+Create view EmployeesBasicView
+as Select Id, FullName, NationalId, BirthDate, Country from Employees;
+
+select * from EmployeesBasicView;
+
+Insert into EmployeesBasicView(FullName, NationalId, BirthDate, Country)
+values('Ali Kamal', '10120230340455', '1997/3/14', 'Egypt');
+
+update EmployeesBasicView set NationalId = '10102020303077' where Id = 13;
+
+Create view KuwaitEmployeesBasicView 
+as
+Select Id, FullName, NationalId, BirthDate, Country from Employees where Country = 'Kuwait';
+
+select * from Employees;
+
+select * from KuwaitEmployeesBasicView;
+
+update KuwaitEmployeesBasicView set NationalId = '10203040500090' where Id = 3;
+
+delete from KuwaitEmployeesBasicView where Id = 3;
+
+Select LOWER('SQL Server');
+
+Select Upper('SQL Server');
+
+select '|' + LTRIM(' SQL Server ') + '|';
+
+select '|' + rTRIM(' SQL Server ') + '|';
+
+select '|' + TRIM(' SQL Server ') + '|';
+
+select len('SQL Server');
+
+select CharIndex('e', 'SQL Server'); --One-based Index
+
+select Replace('SQL Server', 'Server', 'Database');
+
+select left('SQL Server', 5);
+
+select right('SQL Server', 5);
+
+select Substring('SQL Server', 5, 3);
+
+----1.3. Mathematical Function:
+select SQRT(81);
+
+select floor(7.4);
+
+select floor(7.6);
+
+select floor(-7.4);
+
+select floor(-7.6);
+
+select ceiling(7.4);
+
+select ceiling(7.6);
+
+select ceiling(-7.4);
+
+select ceiling(-7.6);
+
+select round(3.567, 0);
+
+select round(3.567, 1);
+
+select round(3.567, 2);
+
+select round(3.567, 3);
+
+select GETDATE();
+
+select GETUTCDATE();
+
+select ISDATE('25/12/2024'); --0: False
+
+select ISDATE('2024/12/25'); --1: True
+
+select DATENAME(YEAR, '2024/12/25');
+
+select DATENAME(MONTH, '2024/12/25');
+
+select DATENAME(WEEK, '2024/12/25');
+
+select DATENAME(DAY, '2024/12/25');
+
+select DATENAME(DAYOFYEAR, '2024/12/25');
+
+select DATENAME(WEEKDAY, '2024/12/25');
+
+select DATEPART(YEAR, '2024/12/25');
+
+select DATEPART(MONTH, '2024/12/25');
+
+select DATEPART(WEEK, '2024/12/25');
+
+select DATEPART(DAY, '2024/12/25');
+
+select DATEPART(DAYOFYEAR, '2024/12/25');
+
+select DATEPART(WEEKDAY, '2024/12/25');
+
+Select YEAR('2024/12/25');
+
+Select MONTH('2024/12/25');
+
+Select DAY('2024/12/25');
+
+Select DATEDIFF(YEAR, '2018/4/15', '2024/12/25');
+
+Select DATEDIFF(MONTH, '2018/4/15', '2024/12/25');
+
+Select DATEDIFF(WEEK, '2018/4/15', '2024/12/25');
+
+Select DATEDIFF(DAY, '2018/4/15', '2024/12/25');
+
+Select DATEADD(YEAR, 3, '2024/12/25');
+
+Select DATEADD(MONTH, 3, '2024/12/25');
+
+Select DATEADD(WEEK, 3, '2024/12/25');
+
+Select DATEADD(DAY, 3, '2024/12/25');
+
+create function CalculatePrice(@cost decimal(18,2), @ProfitRatio decimal(18,2))
+returns decimal(18,2)
+begin
+ return @cost + @cost * @ProfitRatio
+end;
+
+select dbo.CalculatePrice(4000, 0.25);
+
+create function GetDepartmentEmployees(@deptId int)
+returns table
+as 
+return select * from Employees where DepartmentId = @deptId;
+
+select * from dbo.GetDepartmentEmployees(2);
+
+--Stored Procedures:
+-- A Stored Procedure can contain insert, update and delete
+-- A Stored Procedure must return integer
+-- A Stored Procedure cannot be used inline 
+
+--1. System/Bulit-in/Pre-defined Stored Procedure
+-- sp_renameDB, sp_rename, sp_help
+
+--2. Uesr defined Stored Procedures
+create procedure sp_Insert_Department @name nvarchar(max), @description nvarchar(max)
+as
+begin 
+ insert into Departments(Name, Description) values(@name, @description);
+end
+
+select * from Departments;
+
+sp_Insert_Department 'HR', 'Human Resources';
+
+sp_Insert_Department 'TS', 'Technical Support';
+
+create Procedure sp_Select_Department @id int
+as
+begin
+ select * from Departments where Id = @id;
+end
+
+execute sp_Select_Department 2;
+exec sp_Select_Department 2;
+sp_Select_Department 2;
+
+drop procedure sp_Select_Department;
+
+create Procedure sp_Delete_Depatment @id int 
+as
+begin   
+ delete from Departments where Id = @id;
+end
+
+sp_Delete_Depatment 5;
+
+select * from Departments
+
+Create trigger tr_Department_Insert on Departments for insert
+as
+begin 
+ declare @deptName nvarchar(max);
+ select @deptName = name from inserted;  --Corrected assignment
+ print 'A new department with name ' + @deptName + ' Inserted on ' + cast(GETDATE() AS Nvarchar);
+end
+
+insert into Departments (Name, Description) values ('M&S', 'Marketing and Sales');
+
+create trigger tr_Departments_Prevent_Delete on Departments Instead of delete
+as
+begin
+ print 'A department delete is forbidden.';
+end
+
+delete from Departments where Id = 3;
+
+select * from Departments;
+
+begin try
+ begin transaction
+  insert into Plants (Name) values ('Plant 05');
+  delete from Chemicals where Id = 2;
+  update Plants set Name = null where Id = 3;
+ commit transaction
+end try
+
+begin catch
+ rollback transaction;
+ select ERROR_MESSAGE();
+end catch
+
+Select * from Plants;
+select * from Chemicals;)
+
+
  
 
 
